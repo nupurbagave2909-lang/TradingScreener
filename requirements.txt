@@ -2,3 +2,5 @@ streamlit
 smartapi-python
 pyotp
 pandas
+logzero
+websocket-client
