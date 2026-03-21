@@ -4,3 +4,4 @@ pyotp
 pandas
 logzero
 websocket-client
+plotly
