@@ -5,3 +5,4 @@ pandas
 logzero
 websocket-client
 plotly
+pytz
