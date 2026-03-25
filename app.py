@@ -96,4 +96,35 @@ if start:
                 cols = st.columns(2)
                 for j in range(2):
                     if i + j < len(stocks):
-                        s = stocks[i + j
+                        s = stocks[i + j]
+                        now_ist = datetime.datetime.now(IST)
+                        # Fetch Day Levels
+                        from_d = (now_ist - datetime.timedelta(days=5)).strftime('%Y-%m-%d %H:%M')
+                        to_d = now_ist.strftime('%Y-%m-%d %H:%M')
+                        hist = api.getCandleData({"exchange": "NSE", "symboltoken": s['t'], "interval": "ONE_DAY", "fromdate": from_d, "todate": to_d})
+                        
+                        if hist['status'] and len(hist['data']) >= 2:
+                            pdh, pdl = hist['data'][-2][2], hist['data'][-2][3]
+                            start_0915 = now_ist.strftime('%Y-%m-%d 09:15')
+                            candles = api.getCandleData({"exchange": "NSE", "symboltoken": s['t'], "interval": "FIVE_MINUTE", "fromdate": start_0915, "todate": to_d})
+                            
+                            if candles['status'] and candles['data']:
+                                df = pd.DataFrame(candles['data'], columns=['ts', 'o', 'h', 'l', 'c', 'v'])
+                                
+                                # Signal Check
+                                signal = None
+                                if len(df) >= 2:
+                                    c1, c2 = df.iloc[-2], df.iloc[-1]
+                                    is_break = (mode=="BUY" and c1['c'] > pdh) or (mode=="SELL" and c1['c'] < pdl)
+                                    if is_break and (abs(c1['c']-c1['o'])/c1['o'])*100 <= 3.0:
+                                        risk = abs(c2['c'] - (c2['l'] if mode=="BUY" else c2['h']))
+                                        if risk > 0 and (risk/c2['c'])*100 <= 1.0:
+                                            signal = {"qty": math.floor(u_risk/risk)}
+
+                                with cols[j]:
+                                    if signal: st.success(f"🎯 SIGNAL: {s['s']} | Buy Qty: {signal['qty']}")
+                                    else: st.write(f"🔍 Monitoring **{s['s']}**")
+                                    st.plotly_chart(create_chart(df, s['s'], pdh, pdl), use_container_width=True)
+
+            time.sleep(60)
+            st.rerun()
