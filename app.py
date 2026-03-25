@@ -4,7 +4,7 @@ import plotly.graph_objects as go
 from SmartApi import SmartConnect
 
 # --- CONFIG ---
-st.set_page_config(page_title="Bazaar Ke Mahir - Multi-Sector Dashboard", layout="wide", page_icon="🏦")
+st.set_page_config(page_title="TradingScreener - Multi-Sector Dashboard", layout="wide", page_icon="🏦")
 
 # --- STOCKS DATABASE (Comprehensive List) ---
 STOCKS_DB = {
