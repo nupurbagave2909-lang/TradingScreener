@@ -6,3 +6,4 @@ logzero
 websocket-client
 plotly
 pytz
+streamlit-lottie
