@@ -7,3 +7,4 @@ websocket-client
 plotly
 pytz
 streamlit-lottie
+requests
