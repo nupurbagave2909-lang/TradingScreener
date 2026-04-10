@@ -138,7 +138,7 @@ with st.sidebar:
 # --- UI MAIN ---
 if not start:
     if lottie_scanning: st_lottie(lottie_scanning, height=300)
-    st.markdown("<h2 style='text-align: center;'>Bazaar Ke Mahir Pro Dashboard</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'> Pro Trading Dashboard</h2>", unsafe_allow_html=True)
     st.info("👈 Enter details and click START to begin live scanning.")
 else:
     api = login(u_api, u_id, u_pwd, u_totp)
