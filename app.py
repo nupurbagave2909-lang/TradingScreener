@@ -7,8 +7,15 @@ from streamlit_lottie import st_lottie
 import requests
 
 # --- CONFIG ---
-st.set_page_config(page_title="Bazaar Ke Mahir - Live", layout="wide", page_icon="⚡")
+st.set_page_config(page_title="Bazaar Ke Mahir Pro", layout="wide", page_icon="⚡")
 IST = pytz.timezone('Asia/Kolkata')
+
+# --- IP DETECTION (The Fix for Dynamic Networks) ---
+def get_current_ip():
+    try:
+        return requests.get('https://api.ipify.org').text
+    except:
+        return "127.0.0.1"
 
 # --- ANIMATION LOADER ---
 def load_lottieurl(url):
@@ -27,12 +34,13 @@ STOCKS_DB = {
     "NIFTY IT": [{"s": "TCS-EQ", "t": "11536"}, {"s": "INFY-EQ", "t": "1594"}, {"s": "HCLTECH-EQ", "t": "2324"}, {"s": "WIPRO-EQ", "t": "3787"}],
     "NIFTY AUTO": [{"s": "TATAMOTORS-EQ", "t": "3456"}, {"s": "M&M-EQ", "t": "2031"}, {"s": "MARUTI-EQ", "t": "10999"}],
     "NIFTY METAL": [{"s": "TATASTEEL-EQ", "t": "3499"}, {"s": "VEDL-EQ", "t": "3063"}, {"s": "HINDALCO-EQ", "t": "1363"}, {"s": "JSWSTEEL-EQ", "t": "3506"}],
-    "NIFTY MEDIA": [{"s": "ZEEL-EQ", "t": "583"}, {"s": "SUNTV-EQ", "t": "13404"}, {"s": "SAREGAMA-EQ", "t": "1546"}]
+    "NIFTY MEDIA": [{"s": "ZEEL-EQ", "t": "583"}, {"s": "SUNTV-EQ", "t": "13404"}]
 }
 
-# --- LOGIN WITH DYNAMIC IP DETECTION ---
+# --- LOGIN WITH ERROR LOGGING ---
 def login(api_key, client_id, password, totp_secret):
-    # This helps tell AngelOne which IP we are coming from dynamically
+    # Detect the IP the app is using RIGHT NOW
+    curr_ip = get_current_ip()
     smart_api = SmartConnect(api_key=api_key)
     try:
         token = pyotp.TOTP(totp_secret.strip().replace(" ", "")).now()
@@ -40,14 +48,18 @@ def login(api_key, client_id, password, totp_secret):
         if res['status']:
             return smart_api
         else:
-            st.error(f"AngelOne Error: {res.get('message')}")
+            # Tell the relative exactly what to fix
+            err_msg = res.get('message', 'Unknown Error')
+            st.error(f"❌ Login Failed: {err_msg}")
+            if "Invalid IP" in err_msg or "Internal Error" in err_msg:
+                st.warning(f"⚠️ Action Required: Your current network IP is **{curr_ip}**. Please add this to your Angel One Portal settings.")
             return None
     except Exception as e:
-        st.error(f"Login Error: {str(e)}")
+        st.error(f"System Error: {str(e)}")
         return None
 
 def get_market_sentiment(api):
-    indices = {"NIFTY 50": "99926000", "NIFTY BANK": "99926009", "NIFTY IT": "99926002", "NIFTY PSU BANK": "99926008", "NIFTY MEDIA": "99926006"}
+    indices = {"NIFTY 50": "99926000", "NIFTY BANK": "99926009", "NIFTY IT": "99926002", "NIFTY METAL": "99926004", "NIFTY AUTO": "99926001", "NIFTY PSU BANK": "99926008", "NIFTY MEDIA": "99926006"}
     perf = []
     for name, token in indices.items():
         try:
@@ -70,15 +82,12 @@ def create_chart(df, symbol, pdh, pdl):
     fig.add_trace(go.Scatter(x=df['ts'], y=df['ema10'], line=dict(color='orange', width=2), name="EMA-10"))
     fig.add_hline(y=pdh, line_dash="dash", line_color="green", annotation_text="Yesterday High")
     fig.add_hline(y=pdl, line_dash="dash", line_color="red", annotation_text="Yesterday Low")
-    
-    # Force India Market Time Window
     now = datetime.datetime.now(IST)
     fig.update_xaxes(range=[now.strftime('%Y-%m-%d 09:15'), now.strftime('%Y-%m-%d 15:30')])
     fig.update_layout(template="plotly_dark", height=450, margin=dict(l=0,r=0,t=30,b=0), xaxis_rangeslider_visible=False)
     return fig
 
 # --- UI ---
-st.title("🛡️ Bazaar Ke Mahir Pro")
 st.sidebar.title("🔑 Secure Login")
 u_api = st.sidebar.text_input("API Key", type="password")
 u_id = st.sidebar.text_input("Client ID")
@@ -88,9 +97,13 @@ u_risk = st.sidebar.number_input("Risk Per Trade (₹)", 1000)
 u_sector = st.sidebar.selectbox("Market Focus", ["Auto-Select"] + list(STOCKS_DB.keys()))
 start = st.sidebar.button("🚀 START LIVE SCAN")
 
+# Show current IP in sidebar footer so they always know it
+st.sidebar.divider()
+st.sidebar.caption(f"🌐 App Server IP: {get_current_ip()}")
+
 if not start:
     if lottie_scanning: st_lottie(lottie_scanning, height=300)
-    st.info("Enter details in the sidebar to start live market monitoring.")
+    st.info("Enter details in the sidebar and click START. Market scans begin at 9:20 AM IST.")
 else:
     api = login(u_api, u_id, u_pwd, u_totp)
     if api:
@@ -103,13 +116,11 @@ else:
             c2.metric("Target Sector", final_sector)
             c3.write(f"🇮🇳 IST: {datetime.datetime.now(IST).strftime('%H:%M:%S')}")
 
-            # Blue Sector Bar Chart
-            st.subheader("📊 Sector Strengths")
+            st.subheader("📊 Sector Relative Strength")
             fig_bar = go.Figure(go.Bar(x=sector_df['Sector'], y=sector_df['Change'], marker_color='royalblue'))
             fig_bar.update_layout(template="plotly_dark", height=250, margin=dict(l=0,r=0,t=10,b=0))
             st.plotly_chart(fig_bar, use_container_width=True)
 
-            # Stocks Scan
             stocks = STOCKS_DB.get(final_sector, [])
             for i in range(0, len(stocks), 2):
                 cols = st.columns(2)
