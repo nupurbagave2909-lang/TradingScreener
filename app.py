@@ -7,7 +7,7 @@ from streamlit_lottie import st_lottie
 import requests
 
 # --- CONFIG ---
-st.set_page_config(page_title="Bazaar Ke Mahir Pro", layout="wide", page_icon="⚡")
+st.set_page_config(page_title="Pro Trading Strategy", layout="wide", page_icon="⚡")
 IST = pytz.timezone('Asia/Kolkata')
 
 # --- IP DETECTION (The Fix for Dynamic Networks) ---
@@ -29,12 +29,36 @@ lottie_success = load_lottieurl("https://lottie.host/80407a1b-10f7-4180-8774-686
 
 # --- STOCKS DATABASE ---
 STOCKS_DB = {
-    "NIFTY PSU BANK": [{"s": "SBIN-EQ", "t": "3045"}, {"s": "PNB-EQ", "t": "10666"}, {"s": "BANKBARODA-EQ", "t": "467"}, {"s": "CANBK-EQ", "t": "10791"}],
-    "NIFTY BANK": [{"s": "HDFCBANK-EQ", "t": "1333"}, {"s": "ICICIBANK-EQ", "t": "4963"}, {"s": "AXISBANK-EQ", "t": "591"}, {"s": "KOTAKBANK-EQ", "t": "1922"}],
-    "NIFTY IT": [{"s": "TCS-EQ", "t": "11536"}, {"s": "INFY-EQ", "t": "1594"}, {"s": "HCLTECH-EQ", "t": "2324"}, {"s": "WIPRO-EQ", "t": "3787"}],
-    "NIFTY AUTO": [{"s": "TATAMOTORS-EQ", "t": "3456"}, {"s": "M&M-EQ", "t": "2031"}, {"s": "MARUTI-EQ", "t": "10999"}],
-    "NIFTY METAL": [{"s": "TATASTEEL-EQ", "t": "3499"}, {"s": "VEDL-EQ", "t": "3063"}, {"s": "HINDALCO-EQ", "t": "1363"}, {"s": "JSWSTEEL-EQ", "t": "3506"}],
-    "NIFTY MEDIA": [{"s": "ZEEL-EQ", "t": "583"}, {"s": "SUNTV-EQ", "t": "13404"}]
+    "NIFTY PSU BANK": [
+        {"s": "SBIN-EQ", "t": "3045"}, {"s": "PNB-EQ", "t": "10666"}, {"s": "BANKBARODA-EQ", "t": "467"}, {"s": "CANBK-EQ", "t": "10791"}, {"s": "UNIONBANK-EQ", "t": "10245"},
+        {"s": "IDBI-EQ", "t": "1515"}, {"s": "INDIANB-EQ", "t": "11403"}, {"s": "MAHABANK-EQ", "t": "2013"}, {"s": "UCOBANK-EQ", "t": "11411"}, {"s": "CENTRALBK-EQ", "t": "10168"},
+        {"s": "IOB-EQ", "t": "10642"}, {"s": "PSB-EQ", "t": "10729"}, {"s": "BANKINDIA-EQ", "t": "481"}, {"s": "MAHSEAMLESS-EQ", "t": "13611"}
+    ],
+    "NIFTY BANK": [
+        {"s": "HDFCBANK-EQ", "t": "1333"}, {"s": "ICICIBANK-EQ", "t": "4963"}, {"s": "AXISBANK-EQ", "t": "591"}, {"s": "KOTAKBANK-EQ", "t": "1922"}, {"s": "INDUSINDBK-EQ", "t": "5258"},
+        {"s": "AUBANK-EQ", "t": "21238"}, {"s": "FEDERALBNK-EQ", "t": "1023"}, {"s": "IDFCFIRSTB-EQ", "t": "11184"}, {"s": "BANDHANBNK-EQ", "t": "2263"}, {"s": "RBLBANK-EQ", "t": "18391"},
+        {"s": "CUB-EQ", "t": "5701"}, {"s": "IDFC-EQ", "t": "11116"}, {"s": "YESBANK-EQ", "t": "11915"}, {"s": "KARURVYSYA-EQ", "t": "1738"}
+    ],
+    "NIFTY IT": [
+        {"s": "TCS-EQ", "t": "11536"}, {"s": "INFY-EQ", "t": "1594"}, {"s": "HCLTECH-EQ", "t": "2324"}, {"s": "WIPRO-EQ", "t": "3787"}, {"s": "TECHM-EQ", "t": "13538"},
+        {"s": "LTIM-EQ", "t": "17818"}, {"s": "COFORGE-EQ", "t": "11543"}, {"s": "MPHASIS-EQ", "t": "4503"}, {"s": "PERSISTENT-EQ", "t": "18365"}, {"s": "LTTS-EQ", "t": "18564"},
+        {"s": "TATAELXSI-EQ", "t": "3518"}, {"s": "KPITTECH-EQ", "t": "2650"}, {"s": "CYIENT-EQ", "t": "6345"}, {"s": "ZENSARTECH-EQ", "t": "3863"}
+    ],
+    "NIFTY AUTO": [
+        {"s": "TATAMOTORS-EQ", "t": "3456"}, {"s": "M&M-EQ", "t": "2031"}, {"s": "MARUTI-EQ", "t": "10999"}, {"s": "BAJAJ-AUTO-EQ", "t": "16669"}, {"s": "EICHERMOT-EQ", "t": "910"},
+        {"s": "TVSMOTOR-EQ", "t": "8442"}, {"s": "HEROMOTOCO-EQ", "t": "1348"}, {"s": "ASHOKLEY-EQ", "t": "212"}, {"s": "BALKRISIND-EQ", "t": "521"}, {"s": "BHARATFORG-EQ", "t": "422"},
+        {"s": "MRF-EQ", "t": "2277"}, {"s": "APOLLOTYRE-EQ", "t": "163"}, {"s": "SONACOMS-EQ", "t": "10023"}, {"s": "SAMVARDHANA-EQ", "t": "12030"}
+    ],
+    "NIFTY METAL": [
+        {"s": "TATASTEEL-EQ", "t": "3499"}, {"s": "VEDL-EQ", "t": "3063"}, {"s": "HINDALCO-EQ", "t": "1363"}, {"s": "JSWSTEEL-EQ", "t": "3506"}, {"s": "JINDALSTEL-EQ", "t": "1727"},
+        {"s": "NATIONALUM-EQ", "t": "6364"}, {"s": "NMDC-EQ", "t": "15332"}, {"s": "SAIL-EQ", "t": "2963"}, {"s": "APLAPOLLO-EQ", "t": "13606"}, {"s": "HINDZINC-EQ", "t": "1446"},
+        {"s": "WELCORP-EQ", "t": "13170"}, {"s": "RATNAMANI-EQ", "t": "2816"}, {"s": "ADANIENT-EQ", "t": "25"}
+    ],
+    "NIFTY PHARMA": [
+        {"s": "SUNPHARMA-EQ", "t": "3351"}, {"s": "CIPLA-EQ", "t": "694"}, {"s": "DRREDDY-EQ", "t": "881"}, {"s": "DIVISLAB-EQ", "t": "10940"}, {"s": "LUPIN-EQ", "t": "10440"},
+        {"s": "AUROPHARMA-EQ", "t": "275"}, {"s": "BIOCON-EQ", "t": "11373"}, {"s": "TORNTPHARM-EQ", "t": "3530"}, {"s": "ALKEM-EQ", "t": "11703"}, {"s": "ABBOTT-EQ", "t": "11"},
+        {"s": "GLENMARK-EQ", "t": "7406"}, {"s": "ZYDUSLIFE-EQ", "t": "2608"}, {"s": "IPCALAB-EQ", "t": "1633"}, {"s": "LAURUSLABS-EQ", "t": "16893"}
+    ]
 }
 
 # --- LOGIN WITH ERROR LOGGING ---
