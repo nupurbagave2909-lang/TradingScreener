@@ -124,7 +124,7 @@ start = st.sidebar.button("🚀 START SCAN")
 
 if not start:
     if lottie_scanning: st_lottie(lottie_scanning, height=300)
-    st.info("Strategy: 3% Master Candle Limit | 1.5% Max Risk Filter")
+    st.info("👈 Enter details and click START to begin live scanning.")
 else:
     api = login(u_api, u_id, u_pwd, u_totp)
     if api:
