@@ -70,7 +70,6 @@ STOCKS_DB = {
         {"s": "BRITANNIA-EQ", "t": "547"}, {"s": "TATACONSUM-EQ", "t": "3432"}, {"s": "GODREJCP-EQ", "t": "10099"}
     ]
 }
-
 # --- LOGIC ---
 def login(api_key, client_id, password, totp_secret):
     api = SmartConnect(api_key=api_key)
@@ -81,7 +80,7 @@ def login(api_key, client_id, password, totp_secret):
     except: return None
 
 def get_market_data(api):
-    indices = {"NIFTY 50": "99926000", "NIFTY BANK": "99926009", "NIFTY IT": "99926002", "NIFTY METAL": "99926004", "NIFTY AUTO": "99926001", "NIFTY MEDIA": "99926006", "INDIA VIX": "99926017"}
+    indices = {"NIFTY 50": "99926000", "NIFTY BANK": "99926009", "NIFTY IT": "99926002", "NIFTY METAL": "99926004", "NIFTY AUTO": "99926001", "NIFTY PSU BANK": "99926008", "NIFTY MEDIA": "99926006", "INDIA VIX": "99926017"}
     perf = []
     vix_value = 0
     for name, token in indices.items():
@@ -105,7 +104,7 @@ def create_chart(df, symbol, pdh, pdl):
     df['ema10'] = df['c'].ewm(span=10, adjust=False).mean()
     fig = go.Figure()
     fig.add_trace(go.Candlestick(x=df['ts'], open=df['o'], high=df['h'], low=df['l'], close=df['c'], name="Price"))
-    fig.add_trace(go.Scatter(x=df['ts'], y=df['ema10'], line=dict(color='orange', width=2), name="EMA-10"))
+    fig.add_trace(go.Scatter(x=df['ts'], y=df['ema10'], line=dict(color='orange', width=2), name="EMA-10 (Exit)"))
     fig.add_hline(y=pdh, line_dash="dash", line_color="#00ff00", annotation_text=f"PDH")
     fig.add_hline(y=pdl, line_dash="dash", line_color="#ff0000", annotation_text=f"PDL")
     now = datetime.datetime.now(IST)
@@ -125,7 +124,7 @@ start = st.sidebar.button("🚀 START SCAN")
 
 if not start:
     if lottie_scanning: st_lottie(lottie_scanning, height=300)
-    st.info("👈 Enter details and click START to begin live scanning.")
+    st.info("Strategy: 3% Master Candle Limit | 1.5% Max Risk Filter")
 else:
     api = login(u_api, u_id, u_pwd, u_totp)
     if api:
@@ -133,14 +132,13 @@ else:
             mode, auto_s, nifty_p, vix, sector_df = get_market_data(api)
             final_sector = auto_s if u_sec == "Auto-Detect" else u_sec
             
-            # Header
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Nifty Mood", mode, f"{nifty_p}%")
             m2.metric("Target Sector", final_sector)
             m3.metric("INDIA VIX", f"{vix}")
             m4.write(f"🇮🇳 IST: {datetime.datetime.now(IST).strftime('%H:%M:%S')}")
 
-            st.subheader("📊 Sector Comparison")
+            st.subheader("📊 Sector Strengths")
             st.plotly_chart(go.Figure(go.Bar(x=sector_df['Sector'], y=sector_df['Change'], marker_color='royalblue')).update_layout(template="plotly_dark", height=180, margin=dict(l=0,r=0,t=0,b=0)), use_container_width=True)
 
             stocks = STOCKS_DB.get(final_sector, [])
@@ -150,37 +148,31 @@ else:
                     if i + j < len(stocks):
                         s = stocks[i + j]
                         now_ist = datetime.datetime.now(IST)
-                        # Fetch Historical Day Data
                         h_res = api.getCandleData({"exchange": "NSE", "symboltoken": s['t'], "interval": "ONE_DAY", "fromdate": (now_ist - datetime.timedelta(days=5)).strftime('%Y-%m-%d %H:%M'), "todate": now_ist.strftime('%Y-%m-%d %H:%M')})
                         if h_res['status'] and len(h_res['data']) >= 2:
                             pdh, pdl = h_res['data'][-2][2], h_res['data'][-2][3]
-                            # Fetch Intraday 5 Min Data
                             c_res = api.getCandleData({"exchange": "NSE", "symboltoken": s['t'], "interval": "FIVE_MINUTE", "fromdate": now_ist.strftime('%Y-%m-%d 09:15'), "todate": now_ist.strftime('%Y-%m-%d %H:%M')})
                             
                             if c_res['status'] and c_res['data']:
                                 df = pd.DataFrame(c_res['data'], columns=['ts', 'o', 'h', 'l', 'c', 'v'])
                                 signal = None
                                 
-                                # SCAN ENTIRE DAY FOR FIRST SIGNAL
                                 for idx in range(len(df)-1):
-                                    c1 = df.iloc[idx]   # Potential Master
-                                    c2 = df.iloc[idx+1] # Potential Confirmation
+                                    c1, c2 = df.iloc[idx], df.iloc[idx+1]
+                                    is_break = (mode == "BUY" and c1['c'] > pdh) or (mode == "SELL" and c1['c'] < pdl)
                                     
-                                    # Logic for BUY
-                                    if mode == "BUY" and c1['c'] > pdh:
-                                        if (abs(c1['c']-c1['o'])/c1['o'])*100 <= 2.0: # Size Rule
-                                            if c2['c'] > c2['o'] and c2['l'] >= c1['l']: # Conf Rule
+                                    # ORIGINAL 3% RULE
+                                    if is_break and (abs(c1['c']-c1['o'])/c1['o'])*100 <= 3.0: 
+                                        if mode == "BUY":
+                                            if c2['c'] > c2['o'] and c2['l'] >= c1['l']:
                                                 risk = abs(c2['c'] - c2['l'])
-                                                if risk > 0 and (risk/c2['c'])*100 <= 1.0: # SL Rule
+                                                if (risk/c2['c'])*100 <= 1.5: # 1.5% Risk Cap
                                                     signal = {"ent": c2['c'], "sl": c2['l'], "qty": math.floor(u_risk/risk)}
-                                                    break # Only take first signal of the day
-                                    
-                                    # Logic for SELL
-                                    elif mode == "SELL" and c1['c'] < pdl:
-                                        if (abs(c1['c']-c1['o'])/c1['o'])*100 <= 2.0: # Size Rule
-                                            if c2['c'] < c2['o'] and c2['h'] <= c1['h']: # Conf Rule
+                                                    break
+                                        else: # SELL
+                                            if c2['c'] < c2['o'] and c2['h'] <= c1['h']:
                                                 risk = abs(c2['h'] - c2['c'])
-                                                if risk > 0 and (risk/c2['c'])*100 <= 1.0: # SL Rule
+                                                if (risk/c2['c'])*100 <= 1.5:
                                                     signal = {"ent": c2['c'], "sl": c2['h'], "qty": math.floor(u_risk/risk)}
                                                     break
 
@@ -193,7 +185,7 @@ else:
                                         e2.metric("SL (EXIT)", f"₹{signal['sl']}")
                                         e3.metric("QTY", signal['qty'])
                                     else:
-                                        st.write(f"🔍 Monitoring **{s['s']}**")
+                                        st.write(f"🔎 Monitoring **{s['s']}**")
                                     st.plotly_chart(create_chart(df, s['s'], pdh, pdl), use_container_width=True)
 
             time.sleep(60)
