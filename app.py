@@ -7,7 +7,7 @@ from streamlit_lottie import st_lottie
 import requests
 
 # --- CONFIG ---
-st.set_page_config(page_title="Pro Trading Strategy", layout="wide", page_icon="🚀")
+st.set_page_config(page_title="PRO TRADING STRATEGY", layout="wide", page_icon="🚀")
 IST = pytz.timezone('Asia/Kolkata')
 
 # --- ANIMATION LOADER ---
@@ -20,7 +20,7 @@ def load_lottieurl(url):
 lottie_scan = load_lottieurl("https://lottie.host/627447e1-857e-4076-880c-03d154f67699/A7rVp8j3v9.json")
 lottie_rocket = load_lottieurl("https://lottie.host/80407a1b-10f7-4180-8774-6869b3620942/EwZ67A5bXz.json")
 
-# --- MASSIVE STOCKS DATABASE (Categorized) ---
+# --- MASSIVE STOCKS DATABASE ---
 STOCKS_DB = {
     "NIFTY BANK": [
         {"s": "HDFCBANK-EQ", "t": "1333"}, {"s": "ICICIBANK-EQ", "t": "4963"}, {"s": "AXISBANK-EQ", "t": "591"}, 
@@ -109,18 +109,19 @@ def create_chart(df, symbol, pdh, pdl):
     return fig
 
 # --- UI ---
-st.sidebar.title("🔐 Trader Access")
+st.sidebar.title("Secure Access")
 u_api = st.sidebar.text_input("API Key", type="password")
 u_id = st.sidebar.text_input("Client ID")
 u_pwd = st.sidebar.text_input("Password", type="password")
 u_totp = st.sidebar.text_input("TOTP Secret", type="password")
-u_risk = st.sidebar.number_input("Risk Per Trade (₹)", 1000)
-start = st.sidebar.button("🚀 START SCAN")
+u_risk = st.sidebar.number_input("Risk Per Trade (Rs)", 1000)
+start = st.sidebar.button("START GLOBAL SCAN")
 
 if not start:
     if lottie_scan: st_lottie(lottie_scan, height=300)
     st.markdown("<h2 style='text-align: center;'>Bazaar Ke Mahir: Global Dashboard</h2>", unsafe_allow_html=True)
-    st.info(""👈 Enter details and click START to begin live scanning."")
+    # FIXED: Removed the invalid emoji that caused the syntax error
+    st.info("👈 Enter details and click START to begin live scanning.")
 else:
     api = login(u_api, u_id, u_pwd, u_totp)
     if api:
@@ -131,17 +132,17 @@ else:
             m1, m2, m3 = st.columns(3)
             m1.metric("Nifty Mood", mode, f"{nifty_p}%")
             m2.metric("India VIX", vix)
-            m3.write(f"🇮🇳 IST: {datetime.datetime.now(IST).strftime('%H:%M:%S')}")
+            m3.write(f"IST: {datetime.datetime.now(IST).strftime('%H:%M:%S')}")
 
             # Sector Comparison Chart
-            st.subheader("📊 All Sector Performance")
+            st.subheader("All Sector Performance")
             st.plotly_chart(go.Figure(go.Bar(x=sector_df['Sector'], y=sector_df['Change'], marker_color='royalblue')).update_layout(template="plotly_dark", height=200, margin=dict(l=0,r=0,t=0,b=0)), use_container_width=True)
 
             st.divider()
 
             # --- LOOP THROUGH ALL SECTORS ---
             for sector_name, stocks in STOCKS_DB.items():
-                st.header(f"📁 {sector_name}")
+                st.header(f"Section: {sector_name}")
                 
                 for i in range(0, len(stocks), 2):
                     cols = st.columns(2)
@@ -172,11 +173,13 @@ else:
                                 with cols[j]:
                                     if signal:
                                         if lottie_rocket: st_lottie(lottie_rocket, height=80, key=f"r_{s['s']}")
-                                        st.success(f"🎯 {s['s']} SIGNAL | QTY: {signal['qty']}")
+                                        st.success(f"Signal: {s['s']} | QTY: {signal['qty']}")
                                         st.caption(f"Entry: {signal['ent']} | SL: {signal['sl']}")
                                     else:
-                                        st.write(f"🔎 Monitoring {s['s']}")
+                                        st.write(f"Scanning: {s['s']}")
                                     st.plotly_chart(create_chart(df, s['s'], pdh, pdl), use_container_width=True)
 
             time.sleep(60)
             st.rerun()
+    else:
+        st.error("Login Failed. Please check Credentials/IP Settings.")
