@@ -7,7 +7,7 @@ from streamlit_lottie import st_lottie
 import requests
 
 # --- CONFIG ---
-st.set_page_config(page_title="Bazaar Ke Mahir - Global Screener", layout="wide", page_icon="🚀")
+st.set_page_config(page_title="Pro Trading Strategy", layout="wide", page_icon="🚀")
 IST = pytz.timezone('Asia/Kolkata')
 
 # --- ANIMATION LOADER ---
