@@ -119,7 +119,7 @@ start = st.sidebar.button("START GLOBAL SCAN")
 
 if not start:
     if lottie_scan: st_lottie(lottie_scan, height=300)
-    st.markdown("<h2 style='text-align: center;'>Bazaar Ke Mahir: Global Dashboard</h2>", unsafe_allow_html=True)
+    st.markdown("<h2 style='text-align: center;'>Trading Dashboard</h2>", unsafe_allow_html=True)
     # FIXED: Removed the invalid emoji that caused the syntax error
     st.info("👈 Enter details and click START to begin live scanning.")
 else:
