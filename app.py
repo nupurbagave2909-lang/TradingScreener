@@ -15,7 +15,7 @@ from streamlit_lottie import st_lottie
 import requests
 
 # --- CONFIG ---
-st.set_page_config(page_title="Bazaar Ke Mahir - Global Dashboard", layout="wide", page_icon="🚀")
+st.set_page_config(page_title="PRO TRADING STRATEGY", layout="wide", page_icon="🚀")
 IST = pytz.timezone('Asia/Kolkata')
 
 # --- ANIMATION LOADER ---
@@ -30,16 +30,56 @@ lottie_rocket = load_lottieurl("https://lottie.host/80407a1b-10f7-4180-8774-6869
 
 # --- STOCKS DATABASE ---
 STOCKS_DB = {
-    "NIFTY BANK": [{"s": "HDFCBANK-EQ", "t": "1333"}, {"s": "ICICIBANK-EQ", "t": "4963"}, {"s": "AXISBANK-EQ", "t": "591"}, {"s": "KOTAKBANK-EQ", "t": "1922"}, {"s": "SBIN-EQ", "t": "3045"}, {"s": "PNB-EQ", "t": "10666"}],
-    "NIFTY IT": [{"s": "TCS-EQ", "t": "11536"}, {"s": "INFY-EQ", "t": "1594"}, {"s": "HCLTECH-EQ", "t": "2324"}, {"s": "WIPRO-EQ", "t": "3787"}, {"s": "TECHM-EQ", "t": "13538"}],
-    "NIFTY AUTO": [{"s": "TATAMOTORS-EQ", "t": "3456"}, {"s": "M&M-EQ", "t": "2031"}, {"s": "MARUTI-EQ", "t": "10999"}, {"s": "BAJAJ-AUTO-EQ", "t": "16669"}],
-    "NIFTY METAL": [{"s": "TATASTEEL-EQ", "t": "3499"}, {"s": "VEDL-EQ", "t": "3063"}, {"s": "HINDALCO-EQ", "t": "1363"}, {"s": "JSWSTEEL-EQ", "t": "3506"}],
-    "NIFTY PHARMA": [{"s": "SUNPHARMA-EQ", "t": "3351"}, {"s": "CIPLA-EQ", "t": "694"}, {"s": "DRREDDY-EQ", "t": "881"}],
-    "NIFTY ENERGY": [{"s": "RELIANCE-EQ", "t": "2885"}, {"s": "ONGC-EQ", "t": "2475"}, {"s": "NTPC-EQ", "t": "11630"}],
-    "NIFTY REALTY": [{"s": "DLF-EQ", "t": "14732"}, {"s": "LODHA-EQ", "t": "4306"}],
-    "NIFTY MEDIA": [{"s": "ZEEL-EQ", "t": "583"}, {"s": "SUNTV-EQ", "t": "13404"}],
-    "NIFTY FMCG": [{"s": "HINDUNILVR-EQ", "t": "1330"}, {"s": "ITC-EQ", "t": "1660"}]
+    "NIFTY BANK": [
+        {"s": "HDFCBANK-EQ", "t": "1333"}, {"s": "ICICIBANK-EQ", "t": "4963"}, {"s": "AXISBANK-EQ", "t": "591"}, 
+        {"s": "KOTAKBANK-EQ", "t": "1922"}, {"s": "SBIN-EQ", "t": "3045"}, {"s": "INDUSINDBK-EQ", "t": "5258"},
+        {"s": "AUBANK-EQ", "t": "21238"}, {"s": "FEDERALBNK-EQ", "t": "1023"}, {"s": "IDFCFIRSTB-EQ", "t": "11184"},
+        {"s": "BANDHANBNK-EQ", "t": "2263"}, {"s": "PNB-EQ", "t": "10666"}, {"s": "BANKBARODA-EQ", "t": "467"},
+        {"s": "CANBK-EQ", "t": "10791"}, {"s": "UNIONBANK-EQ", "t": "10245"}, {"s": "IDBI-EQ", "t": "1515"},
+        {"s": "INDIANB-EQ", "t": "11403"}, {"s": "UCOBANK-EQ", "t": "3688"}, {"s": "BANKINDIA-EQ", "t": "482"}
+    ],
+    "NIFTY IT": [
+        {"s": "TCS-EQ", "t": "11536"}, {"s": "INFY-EQ", "t": "1594"}, {"s": "HCLTECH-EQ", "t": "2324"}, 
+        {"s": "WIPRO-EQ", "t": "3787"}, {"s": "TECHM-EQ", "t": "13538"}, {"s": "LTIM-EQ", "t": "17818"},
+        {"s": "COFORGE-EQ", "t": "11543"}, {"s": "MPHASIS-EQ", "t": "4503"}, {"s": "PERSISTENT-EQ", "t": "18365"},
+        {"s": "LTTS-EQ", "t": "18564"}, {"s": "TATAELXSI-EQ", "t": "3518"}, {"s": "KPITTECH-EQ", "t": "20324"}
+    ],
+    "NIFTY AUTO": [
+        {"s": "TATAMOTORS-EQ", "t": "3456"}, {"s": "M&M-EQ", "t": "2031"}, {"s": "MARUTI-EQ", "t": "10999"}, 
+        {"s": "BAJAJ-AUTO-EQ", "t": "16669"}, {"s": "EICHERMOT-EQ", "t": "910"}, {"s": "TVSMOTOR-EQ", "t": "8442"},
+        {"s": "HEROMOTOCO-EQ", "t": "1348"}, {"s": "ASHOKLEY-EQ", "t": "212"}, {"s": "APOLLOTYRE-EQ", "t": "163"},
+        {"s": "BHARATFORG-EQ", "t": "422"}, {"s": "MRF-EQ", "t": "2277"}, {"s": "BALKRISIND-EQ", "t": "335"}
+    ],
+    "NIFTY METAL": [
+        {"s": "TATASTEEL-EQ", "t": "3499"}, {"s": "JSWSTEEL-EQ", "t": "3506"}, {"s": "HINDALCO-EQ", "t": "1363"}, 
+        {"s": "VEDL-EQ", "t": "3063"}, {"s": "JINDALSTEL-EQ", "t": "1727"}, {"s": "SAIL-EQ", "t": "2963"},
+        {"s": "NMDC-EQ", "t": "15332"}, {"s": "NATIONALUM-EQ", "t": "6364"}, {"s": "HINDCOPPER-EQ", "t": "1370"}
+    ],
+    "NIFTY PHARMA": [
+        {"s": "SUNPHARMA-EQ", "t": "3351"}, {"s": "CIPLA-EQ", "t": "694"}, {"s": "DRREDDY-EQ", "t": "881"}, 
+        {"s": "DIVISLAB-EQ", "t": "10940"}, {"s": "APOLLOHOSP-EQ", "t": "157"}, {"s": "LUPIN-EQ", "t": "10440"},
+        {"s": "AUROPHARMA-EQ", "t": "275"}, {"s": "BIOCON-EQ", "t": "11373"}, {"s": "ZYDUSLIFE-EQ", "t": "1327"}
+    ],
+    "NIFTY ENERGY/OIL": [
+        {"s": "RELIANCE-EQ", "t": "2885"}, {"s": "ONGC-EQ", "t": "2475"}, {"s": "NTPC-EQ", "t": "11630"}, 
+        {"s": "POWERGRID-EQ", "t": "14977"}, {"s": "BPCL-EQ", "t": "526"}, {"s": "COALINDIA-EQ", "t": "20371"},
+        {"s": "GAIL-EQ", "t": "1232"}, {"s": "ADANIGREEN-EQ", "t": "20005"}, {"s": "TATAPOWER-EQ", "t": "3426"}
+    ],
+    "NIFTY REALTY": [
+        {"s": "DLF-EQ", "t": "14732"}, {"s": "LODHA-EQ", "t": "4306"}, {"s": "GODREJPROP-EQ", "t": "17875"}, 
+        {"s": "OBEROIRLTY-EQ", "t": "20249"}, {"s": "PHOENIXLTD-EQ", "t": "2465"}, {"s": "BRIGADE-EQ", "t": "15543"}
+    ],
+    "NIFTY MEDIA": [
+        {"s": "ZEEL-EQ", "t": "583"}, {"s": "SUNTV-EQ", "t": "13404"}, {"s": "PVRINOX-EQ", "t": "13147"},
+        {"s": "SAREGAMA-EQ", "t": "1546"}, {"s": "NETWORK18-EQ", "t": "14413"}, {"s": "TV18BRDCST-EQ", "t": "14282"}
+    ],
+    "NIFTY FMCG": [
+        {"s": "HINDUNILVR-EQ", "t": "1330"}, {"s": "ITC-EQ", "t": "1660"}, {"s": "NESTLEIND-EQ", "t": "17963"}, 
+        {"s": "BRITANNIA-EQ", "t": "547"}, {"s": "TATACONSUM-EQ", "t": "3432"}, {"s": "GODREJCP-EQ", "t": "10099"}
+    ]
 }
+
+
 
 # --- LOGIC ---
 def login(api_key, client_id, password, totp_secret):
@@ -86,7 +126,7 @@ def create_chart(df, symbol, pdh, pdl):
     return fig
 
 # --- UI ---
-st.sidebar.title("🔐 Trader Access")
+st.sidebar.title("👈 Enter details and click START to begin live scanning.")
 u_api = st.sidebar.text_input("API Key", type="password")
 u_id = st.sidebar.text_input("Client ID")
 u_pwd = st.sidebar.text_input("Password", type="password")
